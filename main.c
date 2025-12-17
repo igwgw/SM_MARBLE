@@ -89,7 +89,7 @@ void generatePlayers(int n, int initEnergy)
         fgets(cur_player[i].name, MAX_CHARNAME, stdin);
         cur_player[i].name[strcspn(cur_player[i].name, "\n")] = 0;
 
-        cur_player[i].position     = 0;          // main에서 HOME으로 다시 세팅
+        cur_player[i].position     = 0;          // main에서 HOME
         cur_player[i].energy       = initEnergy;
         cur_player[i].accumCredit  = 0;
         cur_player[i].isExperiment = 0;
@@ -259,7 +259,7 @@ void actionNode(int player)
     {
         case SMMNODE_TYPE_LECTURE:
         {
-            int choice;     //1=join, 0=drop
+            int choice;     //1=join, 0=drop 입력받아 판별 
             int credit;
             int costE;
             char *lecName;
@@ -548,7 +548,7 @@ int main(int argc, const char * argv[])
     }
     while (player_nr < 1 || player_nr > MAX_PLAYER);
 
-    // HOME 위치 찾기(함수 추가 금지라 main에서 처리)
+    // HOME 위치 찾기(
     homePos = 0;
     for (i = 0; i < board_nr; i++) {
         if (smmObj_getType(i) == SMMNODE_TYPE_HOME) { homePos = i; break; }
@@ -613,7 +613,7 @@ int main(int argc, const char * argv[])
     
                printGrades(gradPlayer);
 
-               printf("\n?? GAME OVER ??\n");
+               printf("\n** GAME OVER **\n");
                break;   // 게임 종료
          }
 
