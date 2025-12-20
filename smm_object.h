@@ -17,12 +17,13 @@
     foodChance,
     festival
 */
+
 #define SMMNODE_TYPE_LECTURE                0
 #define SMMNODE_TYPE_RESTAURANT             1
 #define SMMNODE_TYPE_LABORATORY             2
 #define SMMNODE_TYPE_HOME                   3
 #define SMMNODE_TYPE_GOTOLAB                4
-#define SMMNODE_TYPE_FOODCHANGE             5
+#define SMMNODE_TYPE_FOODCHANCE             5
 #define SMMNODE_TYPE_FESTIVAL               6
 
 #define SMMNODE_OBJTYPE_BOARD     0
@@ -48,33 +49,28 @@ typedef enum {
 #define SMMNODE_MAX_GRADE         13
 
 
-//object generation
+//generate
+int smmObj_genNode(char* name, int type, int credit, int energy);
 void* smmObj_genObject(char* name, int objType, int type, int credit, int energy, int grade);
-int smmObj_getNodeType(int node_nr);
-
-char* smmObj_getTypeName(int node_type);
-int smmObj_getNodeCredit(int node_nr);
-//member retrieving
-
 
 //element to string
 char* smmObj_getTypeName(int node_type);
 char* smmObj_getGradeName(int grade);
-
-//
-int smmObj_genNode(char* name, int type, int credit, int energy);
-
 char* smmObj_getName(int node_nr);
 int   smmObj_getType(int node_nr);
-int   smmObj_getNodeCredit(int node_nr);
 int   smmObj_getNodeEnergy(int node_nr);
+int smmObj_getNodeType(int node_nr);
+int smmObj_getNodeCredit(int node_nr);
 
+
+//element to string_object
 int   smmObj_getObjectGrade(void *ptr);
 int   smmObj_getObjectEnergy(void *ptr);
 char* smmObj_getObjectName(void *ptr);
 int   smmObj_getObjectType(void *ptr);
 int   smmObj_getObjectCredit(void *ptr);
 
-extern const double gradePoint[SMMNODE_MAX_GRADE];
+// 4.3 환산 점수 계산 함수 
+double smmObj_getGradePoint(int grade);
 
 #endif /* smm_object_h */

@@ -33,6 +33,9 @@ typedef struct {
 static smmPlayer_t cur_player[MAX_PLAYER];
 static int player_nr = 0;
 
+// ===========================================================
+// function prototype
+// ===========================================================
 #if 0
 int  isGraduated(void);                      //check if any player is graduated
 void generatePlayers(int n, int initEnergy); //generate a new player
@@ -54,7 +57,7 @@ void opening(void)
     printf("\n");
     printf("=====================================================================\n");
     printf("||                                                                 ||\n");
-    printf("||             ★ S O O K M Y U N G   M A R B L E  ★                ||\n");
+    printf("||           ★.* S O O K M Y U N G   M A R B L E *.★               ||\n");
     printf("||                                                                 ||\n");
     printf("||                    (Total Credit : 30)                          ||\n");
     printf("||                                                                 ||\n");
@@ -66,7 +69,7 @@ void opening(void)
 // ===========================================================
 int isGraduated(void)
 {   int i;
-
+    //credit 채우고 home이동 시 graduate 
     for (i = 0; i < player_nr; i++) {
         if (cur_player[i].accumCredit >= GRADUATE_CREDIT &&
             smmObj_getType(cur_player[i].position) == SMMNODE_TYPE_HOME)
@@ -115,7 +118,7 @@ void printPlayerStatus(int player)
 }
 
 // ===========================================================
-// go forward (path printing + HOME pass recharge)
+// go forward 
 // ===========================================================
 void goForward(int player, int step)
 {
@@ -133,7 +136,7 @@ void goForward(int player, int step)
         printf("%s", smmObj_getName(pos));
         if (s != step - 1) printf(" -> ");
 
-        // HOME 지나갈 때마다 에너지 보충
+        // home 지나갈 때마다 에너지 보충 
         if (smmObj_getType(pos) == SMMNODE_TYPE_HOME) {
             cur_player[player].energy += smmObj_getNodeEnergy(pos);
         }
@@ -144,7 +147,7 @@ void goForward(int player, int step)
 }
 
 // ===========================================================
-// find grade object from DB
+// find grade
 // ===========================================================
 void* findGrade(int player, char *lectureName)
 {
@@ -167,7 +170,7 @@ void* findGrade(int player, char *lectureName)
 }
 
 // ===========================================================
-// calc GPA 
+// calculate Average GPA 
 // ===========================================================
 float calcAverageGrade(int player)
 {
@@ -177,8 +180,6 @@ float calcAverageGrade(int player)
 
     double sumPointXCredit;
     int sumCredit;
-
-    extern const double gradePoint[SMMNODE_MAX_GRADE];
 
     list_nr = LISTNO_OFFSET_GRADE + player;
     len = smmdb_len(list_nr);
@@ -197,7 +198,7 @@ float calcAverageGrade(int player)
 
         if (g < 0 || g >= SMMNODE_MAX_GRADE) continue;
 
-        sumPointXCredit += gradePoint[g] * (double)c;
+        sumPointXCredit += smmObj_getGradePoint(g) * (double)c;
         sumCredit += c;
     }
 
@@ -214,7 +215,6 @@ void printGrades(int player)
     int len;
     int i;
 
-    extern const double gradePoint[SMMNODE_MAX_GRADE];
 
     list_nr = LISTNO_OFFSET_GRADE + player;
     len = smmdb_len(list_nr);
@@ -234,7 +234,8 @@ void printGrades(int player)
                smmObj_getObjectName(obj),
                smmObj_getObjectCredit(obj),
                smmObj_getGradeName(g),
-               (g >= 0 && g < SMMNODE_MAX_GRADE) ? gradePoint[g] : 0.0);
+               smmObj_getGradePoint(g));
+
     }
     printf("\n");
 }
@@ -304,7 +305,7 @@ void actionNode(int player)
 
             if (choice != 1)
             {
-                printf("  -> Dropped.\n");
+                printf("  -> Dropped:(\n");
                 break;
             }
 
@@ -312,8 +313,8 @@ void actionNode(int player)
             cur_player[player].energy      -= costE;
             cur_player[player].accumCredit += credit;
 
-            //성적 랜덤 (A+ ~ C-)
-            gradeIdx = rand() % 9;
+            //성적 랜덤 (A+~C-)
+            gradeIdx = rand() % 9;  
 
             gradeObj = smmObj_genObject(
                 lecName,
@@ -346,10 +347,10 @@ void actionNode(int player)
         break;
 
         case SMMNODE_TYPE_HOME:
-            printf("  -> Home!! \n");
+            printf("  -> Home!!^_^ \n");
             break;
 
-        case SMMNODE_TYPE_FOODCHANGE:
+        case SMMNODE_TYPE_FOODCHANCE:
         {
             int idx;
             void* card;
@@ -361,7 +362,7 @@ void actionNode(int player)
             }
 
             idx = rand() % food_nr;
-            card = smmdb_getData(LISTNO_FOODCARD, idx);
+            card = smmdb_getData(LISTNO_FOODCARD, idx);//random food 선택 후 에너지 보충 
             if (!card) break;
 
             gain = smmObj_getObjectEnergy(card);
@@ -383,7 +384,7 @@ void actionNode(int player)
             }
 
             idx = rand() % festival_nr;
-            card = smmdb_getData(LISTNO_FESTCARD, idx);
+            card = smmdb_getData(LISTNO_FESTCARD, idx); //미션 1개 random drop
             if (!card) break;
 
             printf("  -> MISSION: %s\n", smmObj_getObjectName(card));
@@ -396,7 +397,8 @@ void actionNode(int player)
             int i;
 
             cur_player[player].isExperiment = 1;
-            cur_player[player].expGoal = 3;
+            cur_player[player].expGoal = (rand() % MAX_DIE) + 1; //실험 성공값 랜덤 지정 
+
 
             lab = -1;
             for (i = 0; i < board_nr; i++) {
@@ -408,7 +410,7 @@ void actionNode(int player)
                 break;
             }
 
-            cur_player[player].position = lab;
+            cur_player[player].position = lab; //실험시 실험실로 향함 
             printf("  -> GotoLab: experiment START, goal=%d, moved to lab(%s)\n",
                    cur_player[player].expGoal, smmObj_getName(lab));
         }
@@ -432,10 +434,10 @@ void actionNode(int player)
                     cur_player[player].isExperiment = 0;
                     printf("  -> SUCCESS! You can move next turn.\n");
                 } else {
-                    printf("  -> FAIL. Stay in lab (movement blocked in main).\n");
+                    printf("  -> FAIL. Stay in lab.\n");
                 }
             } else {
-                printf("  -> Laboratory: (not experiment) pass.\n");
+                printf("  -> Laboratory: (not experiment) pass.\n"); //실험 중 아닌 실험실인 경우  
             }
         }
         break;
@@ -446,7 +448,7 @@ void actionNode(int player)
 }
 
 // ===========================================================
-// die
+// roll die
 // ===========================================================
 int rolldie(int player)
 {
@@ -548,7 +550,7 @@ int main(int argc, const char * argv[])
     }
     while (player_nr < 1 || player_nr > MAX_PLAYER);
 
-    // HOME 위치 찾기(
+    // HOME 위치 찾기 
     homePos = 0;
     for (i = 0; i < board_nr; i++) {
         if (smmObj_getType(i) == SMMNODE_TYPE_HOME) { homePos = i; break; }
@@ -557,7 +559,7 @@ int main(int argc, const char * argv[])
 
     generatePlayers(player_nr, initEnergy);
 
-    // 시작 위치 HOME으로 보정
+    // 시작 위치 HOME으로
     for (i = 0; i < player_nr; i++) {
         cur_player[i].position = homePos;
         cur_player[i].energy   = initEnergy;
@@ -568,21 +570,23 @@ int main(int argc, const char * argv[])
 
     //3. SM Marble game starts ---------------------------------------------------------------------------------
     turn = 0;
-    while (1) //is anybody graduated?
+    while (1) //graduate 여부 확인 
     {
         int die_result;
 
         //4-1. initial printing
-        printf("\n-------------------------------------------------------------------\n");
-        printf(">> TURN : Player %d (%s)<<\n", turn, cur_player[turn].name);
+        
+        //누구 turn인지 표시 
+        printf("\n---------------------------------------------------------------------\n");
+        printf(">> TURN : Player %d [%s] <<\n", turn, cur_player[turn].name);
         printf("---------------------------------------------------------------------\n");
 
-        printf("\n========================== PLAYER STATUS ==========================\n");
+        printf("\n========================== PLAYER STATUS ============================\n");
         for (i = 0; i < player_nr; i++)
             printPlayerStatus(i);
-        printf("===================================================================\n\n");
+        printf("=====================================================================\n\n");
 
-        //4-2. die rolling (if not in experiment 
+        //4-2. die rolling (if not in experiment)
         if (cur_player[turn].isExperiment == 0)
         {
             die_result = rolldie(turn);
@@ -605,7 +609,7 @@ int main(int argc, const char * argv[])
         if (gradPlayer != -1)
         {
                printf("\n=================================================\n");
-               printf("++  CONGRATULATIONS! PLAYER %d (%s) GRADUATED!   ++\n",
+               printf("++  CONGRATULATIONS! PLAYER %d [%s] GRADUATED!   ++\n",
                        gradPlayer,
                        cur_player[gradPlayer].name);
                printf("=================================================\n");
@@ -613,8 +617,8 @@ int main(int argc, const char * argv[])
     
                printGrades(gradPlayer);
 
-               printf("\n** GAME OVER **\n");
-               break;   // 게임 종료
+               printf("\n** ♡ GAME OVER ♡ **\n");
+               break;   // credit채워 graduate 시 게임 종료
          }
 
 
@@ -622,9 +626,8 @@ int main(int argc, const char * argv[])
         turn = (turn + 1) % player_nr;
     }
 
-#ifdef _WIN32
     system("PAUSE");
-#endif
+
     return 0;
 }
 

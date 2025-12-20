@@ -57,7 +57,7 @@ static char smmObj_gradeName[SMMNODE_MAX_GRADE][MAX_CHARNAME] = {
        "F"
 };
 // grade point 4.3 max
-const double gradePoint[SMMNODE_MAX_GRADE] = {
+static const double gradePoint[SMMNODE_MAX_GRADE] = {
     4.3,  // A+
     4.0,  // A0
     3.7,  // A-
@@ -101,7 +101,8 @@ void* smmObj_genObject(char* name, int objType, int type, int credit, int energy
     
     return ((void*)ptr);
 }
-//gennode
+
+//node generation
 int smmObj_genNode(char* name, int type, int credit, int energy)
 {
     smmObj_object_t* p;
@@ -120,8 +121,17 @@ int smmObj_genNode(char* name, int type, int credit, int energy)
     return smmObj_board_nr;
 }
 
+// grade 계산 
+double smmObj_getGradePoint(int grade)
+{
+    if (grade < 0 || grade >= SMMNODE_MAX_GRADE)
+        return 0.0;
+    return gradePoint[grade];
+}
 
-//member retrieving
+
+
+//member retrieving_object
 char* smmObj_getObjectName(void *ptr)
 {
       smmObj_object_t* objPtr = (smmObj_object_t*)ptr;
@@ -143,7 +153,6 @@ int smmObj_getObjectType(void *ptr)
     return objPtr->type;
 }
 
-
 int smmObj_getObjectEnergy(void *ptr)
 {
       smmObj_object_t* objPtr = (smmObj_object_t*)ptr;
@@ -151,6 +160,7 @@ int smmObj_getObjectEnergy(void *ptr)
       return (objPtr->energy);
 }
 
+//member retrieving_node
 char* smmObj_getTypeName(int node_type)
 {
       return (smmObj_nodeName[node_type]);
@@ -160,7 +170,6 @@ char* smmObj_getGradeName(int grade)
 {
     return smmObj_gradeName[grade];
 }
-
 
 char* smmObj_getName(int node_nr)
 {
@@ -185,7 +194,7 @@ int smmObj_getNodeEnergy(int node_nr)
     if (node_nr < 0 || node_nr >= smmObj_board_nr) return 0;
     return smmObj_board[node_nr].energy;
 }
-
+//gpa4.3 변환 
 int smmObj_getObjectGrade(void *ptr)
 {
     smmObj_object_t* objPtr = (smmObj_object_t*)ptr;
